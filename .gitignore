@@ -1,0 +1,59 @@
+# .gitignore for drone-gemini-cli-plugin
+
+# Binary
+drone-gemini-cli-plugin
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.html
+
+# Go workspace file
+go.work
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+/dist/
+/bin/
+
+# Dependency directories
+/vendor/
+
+# ========================
+# Sensitive Files - DO NOT COMMIT
+# ========================
+
+# GCP Service Account Keys
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# API Keys and Credentials
+*.key
+*.pem
+*.p12
+credentials/
+secrets/

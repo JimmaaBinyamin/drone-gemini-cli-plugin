@@ -1,0 +1,119 @@
+kind: pipeline
+type: docker
+name: build
+
+steps:
+  # Build and test Go code
+  - name: build
+    image: golang:1.22
+    commands:
+      - go mod download
+      - go build -o drone-gemini-cli-plugin .
+      - go test -v ./...
+
+---
+# Pipeline for AI Code Review on Pull Requests
+kind: pipeline
+type: docker
+name: ai-review
+
+steps:
+  # Option A: Using Gemini API Key (Google AI Studio)
+  - name: gemini-review
+    image: jimmaabinyamin/drone-gemini-cli
+    settings:
+      prompt: |
+        Review this pull request:
+        - Check for security vulnerabilities
+        - Identify potential bugs
+        - Suggest performance improvements
+        - Evaluate code quality
+      git_diff: true
+      model: gemini-2.5-flash
+      output_format: json
+      api_key:
+        from_secret: gemini_api_key
+    when:
+      event: pull_request
+
+trigger:
+  event:
+    - pull_request
+
+---
+# Pipeline for AI Code Review using Vertex AI
+kind: pipeline
+type: docker
+name: ai-review-vertex
+
+steps:
+  # Option B: Using Vertex AI with Service Account
+  - name: vertex-review
+    image: jimmaabinyamin/drone-gemini-cli
+    settings:
+      prompt: |
+        Perform comprehensive code review:
+        - Security vulnerabilities
+        - Bug detection
+        - Performance optimization
+        - Code quality assessment
+      git_diff: true
+      model: gemini-3-pro-preview
+      gcp_project:
+        from_secret: gcp_project
+      gcp_location: global
+      gcp_credentials:
+        from_secret: gcp_credentials
+      output_format: json
+    when:
+      event: pull_request
+
+trigger:
+  event:
+    - pull_request
+
+---
+# Pipeline for Commit Summary on Push
+kind: pipeline
+type: docker
+name: commit-summary
+
+steps:
+  - name: summarize
+    image: jimmaabinyamin/drone-gemini-cli
+    settings:
+      prompt: "Summarize the changes in this commit in a concise format"
+      git_diff: true
+      model: gemini-2.5-flash
+      api_key:
+        from_secret: gemini_api_key
+
+trigger:
+  event:
+    - push
+  branch:
+    - main
+    - master
+
+---
+# Pipeline for Auto-Fix (YOLO Mode)
+# ⚠️ Use with caution - allows AI to modify files
+kind: pipeline
+type: docker
+name: auto-fix
+
+steps:
+  - name: fix-lint
+    image: jimmaabinyamin/drone-gemini-cli
+    settings:
+      prompt: "Fix all linting errors and code style issues"
+      yolo: true
+      include_dirs: "plugin"
+      api_key:
+        from_secret: gemini_api_key
+
+trigger:
+  event:
+    - push
+  branch:
+    - fix/*
