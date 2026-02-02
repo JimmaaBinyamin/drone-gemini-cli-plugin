@@ -4,12 +4,12 @@ A Drone CI/CD plugin that leverages Gemini CLI's Headless mode for AI-powered co
 
 ## Features
 
-- 🤖 **AI Code Review**: Analyze code for security issues, bugs, and improvements
-- ⚡ **YOLO Mode**: Auto-approve all AI actions for automated code modifications
-- 🔧 **Tool Execution**: Supports Bash, file read/write, web search via Gemini CLI
-- 📝 **Git Integration**: Analyze specific commits or PR diffs
-- 📊 **Detailed Statistics**: Token usage, costs, and tool call metrics
-- 🔐 **Dual Auth Support**: Gemini API Key or Vertex AI Service Account
+- **AI Code Review**: Analyze code for security issues, bugs, and improvements
+- **YOLO Mode**: Auto-approve all AI actions for automated code modifications
+- **Tool Execution**: Supports Bash, file read/write, web search via Gemini CLI
+- **Git Integration**: Analyze specific commits or PR diffs
+- **Detailed Statistics**: Token usage, costs, and tool call metrics
+- **Dual Auth Support**: Gemini API Key or Vertex AI Service Account
 
 ## Quick Start
 
@@ -69,7 +69,7 @@ steps:
       prompt: "Review this code for security issues"
       model: gemini-3-pro-preview
       gcp_project: your-gcp-project-id
-      gcp_location: global  # Required for gemini-3-* models
+      gcp_location: global
       gcp_credentials:
         from_secret: gcp_credentials
 ```
@@ -117,7 +117,7 @@ steps:
 
 ### Auto-Fix with YOLO Mode
 
-> ⚠️ **Warning**: YOLO mode allows AI to modify files automatically. Use with caution.
+**Warning**: YOLO mode allows AI to modify files automatically. Use with caution.
 
 ```yaml
 steps:
@@ -202,8 +202,8 @@ PLUGIN_YOLO="true" \
 docker build -t ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin .
 
 # Or with custom registry
-docker build -t your-registry.com/gemini-cli:latest .
-docker push your-registry.com/gemini-cli:latest
+docker build -t your-registry.com/drone-gemini-cli:latest .
+docker push your-registry.com/drone-gemini-cli:latest
 ```
 
 ## Drone Plugin Environment Variables
