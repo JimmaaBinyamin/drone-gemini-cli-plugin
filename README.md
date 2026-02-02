@@ -1,5 +1,7 @@
 # drone-gemini-cli-plugin
 
+English | [中文](README_zh.md)
+
 A Drone CI/CD plugin that leverages Gemini CLI's Headless mode for AI-powered code analysis, review, and automated fixes.
 
 ## Features
