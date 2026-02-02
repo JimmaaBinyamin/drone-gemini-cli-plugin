@@ -30,7 +30,7 @@ name: ai-review
 
 steps:
   - name: code-review
-    image: jimmaabinyamin/drone-gemini-cli
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
     settings:
       prompt: "Review this code for bugs and security issues"
       model: gemini-2.5-flash
@@ -64,7 +64,7 @@ name: ai-review
 
 steps:
   - name: code-review
-    image: jimmaabinyamin/drone-gemini-cli
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
     settings:
       prompt: "Review this code for security issues"
       model: gemini-3-pro-preview
@@ -100,7 +100,7 @@ steps:
 ```yaml
 steps:
   - name: ai-review
-    image: jimmaabinyamin/drone-gemini-cli
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
     settings:
       prompt: |
         Review this PR for:
@@ -122,7 +122,7 @@ steps:
 ```yaml
 steps:
   - name: auto-fix
-    image: jimmaabinyamin/drone-gemini-cli
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
     settings:
       prompt: "Fix all linting errors and format the code"
       yolo: true
@@ -137,7 +137,7 @@ steps:
 ```yaml
 steps:
   - name: security-audit
-    image: jimmaabinyamin/drone-gemini-cli
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
     settings:
       prompt: |
         Perform comprehensive security audit:
@@ -158,7 +158,7 @@ steps:
 ```yaml
 steps:
   - name: release-notes
-    image: jimmaabinyamin/drone-gemini-cli
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
     settings:
       prompt: "Generate release notes from the recent commits in CHANGELOG format"
       git_diff: true
@@ -199,7 +199,7 @@ PLUGIN_YOLO="true" \
 
 ```bash
 # Build the image
-docker build -t jimmaabinyamin/drone-gemini-cli .
+docker build -t ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin .
 
 # Or with custom registry
 docker build -t your-registry.com/gemini-cli:latest .

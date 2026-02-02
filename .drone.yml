@@ -20,7 +20,7 @@ name: ai-review
 steps:
   # Option A: Using Gemini API Key (Google AI Studio)
   - name: gemini-review
-    image: jimmaabinyamin/drone-gemini-cli
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
     settings:
       prompt: |
         Review this pull request:
@@ -49,7 +49,7 @@ name: ai-review-vertex
 steps:
   # Option B: Using Vertex AI with Service Account
   - name: vertex-review
-    image: jimmaabinyamin/drone-gemini-cli
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
     settings:
       prompt: |
         Perform comprehensive code review:
@@ -80,7 +80,7 @@ name: commit-summary
 
 steps:
   - name: summarize
-    image: jimmaabinyamin/drone-gemini-cli
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
     settings:
       prompt: "Summarize the changes in this commit in a concise format"
       git_diff: true
@@ -104,7 +104,7 @@ name: auto-fix
 
 steps:
   - name: fix-lint
-    image: jimmaabinyamin/drone-gemini-cli
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
     settings:
       prompt: "Fix all linting errors and code style issues"
       yolo: true
