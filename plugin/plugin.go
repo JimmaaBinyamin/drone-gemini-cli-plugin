@@ -2,6 +2,8 @@ package plugin
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -24,6 +26,16 @@ func (p *Plugin) Exec() error {
 		return err
 	}
 
+	// Load prompt from file if specified
+	if p.config.PromptFile != "" {
+		content, err := p.readFileContent(p.config.PromptFile)
+		if err != nil {
+			return fmt.Errorf("failed to load prompt_file %q: %w", p.config.PromptFile, err)
+		}
+		fmt.Printf("Loaded prompt from file: %s (%d bytes)\n", p.config.PromptFile, len(content))
+		p.config.Prompt = content
+	}
+
 	// Display configuration summary
 	p.displayConfig()
 
@@ -38,6 +50,20 @@ func (p *Plugin) Exec() error {
 	// Build prompt with optional git context
 	prompt := p.config.Prompt
 	stdinInput := p.config.StdinInput
+
+	// Load context from file if specified
+	if p.config.ContextFile != "" {
+		content, err := p.readFileContent(p.config.ContextFile)
+		if err != nil {
+			return fmt.Errorf("failed to load context_file %q: %w", p.config.ContextFile, err)
+		}
+		fmt.Printf("Loaded context from file: %s (%d bytes)\n", p.config.ContextFile, len(content))
+		if stdinInput != "" {
+			stdinInput = stdinInput + "\n\n" + content
+		} else {
+			stdinInput = content
+		}
+	}
 
 	// If git diff mode is enabled, add git context
 	if p.config.GitDiff {
@@ -69,6 +95,41 @@ func (p *Plugin) Exec() error {
 	return nil
 }
 
+// readFileContent reads file content, resolving path relative to Target directory
+func (p *Plugin) readFileContent(filePath string) (string, error) {
+	// Resolve relative paths based on Target directory
+	if !filepath.IsAbs(filePath) {
+		filePath = filepath.Join(p.config.Target, filePath)
+	}
+
+	// Check if file exists
+	info, err := os.Stat(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("%w: %s", ErrFileNotFound, filePath)
+		}
+		return "", fmt.Errorf("%w: %v", ErrFileRead, err)
+	}
+
+	// Ensure it's a file, not a directory
+	if info.IsDir() {
+		return "", fmt.Errorf("%w: %s is a directory, not a file", ErrFileRead, filePath)
+	}
+
+	// Read file content
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", fmt.Errorf("%w: %v", ErrFileRead, err)
+	}
+
+	content := strings.TrimSpace(string(data))
+	if content == "" {
+		return "", fmt.Errorf("%w: %s is empty", ErrFileRead, filePath)
+	}
+
+	return content, nil
+}
+
 // buildGitContext builds git context for the prompt
 func (p *Plugin) buildGitContext() (string, error) {
 	analyzer := NewGitAnalyzer(p.config.Target, p.config.Debug)
@@ -94,6 +155,14 @@ func (p *Plugin) displayConfig() {
 	fmt.Printf("Prompt: %s\n", truncateString(p.config.Prompt, 100))
 	fmt.Printf("Output Format: %s\n", p.config.OutputFormat)
 	fmt.Printf("Timeout: %ds\n", p.config.Timeout)
+
+	if p.config.PromptFile != "" {
+		fmt.Printf("Prompt File: %s\n", p.config.PromptFile)
+	}
+
+	if p.config.ContextFile != "" {
+		fmt.Printf("Context File: %s\n", p.config.ContextFile)
+	}
 
 	// Display authentication mode
 	authMode := p.config.DetectAuthMode()

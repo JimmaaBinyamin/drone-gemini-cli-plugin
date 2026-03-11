@@ -3,8 +3,14 @@ package plugin
 // Config holds the plugin configuration from environment variables.
 // Drone CI injects these as PLUGIN_* environment variables.
 type Config struct {
-	// Prompt is the instruction for the AI (required)
-	Prompt string `envconfig:"PROMPT" required:"true"`
+	// Prompt is the instruction for the AI (required unless PromptFile is set)
+	Prompt string `envconfig:"PROMPT"`
+
+	// PromptFile is a file path to read the prompt from (overrides Prompt)
+	PromptFile string `envconfig:"PROMPT_FILE"`
+
+	// ContextFile is a file path to read additional context from (appended to stdin)
+	ContextFile string `envconfig:"CONTEXT_FILE"`
 
 	// Target is the working directory for gemini CLI (optional, defaults to ".")
 	Target string `envconfig:"TARGET" default:"."`
@@ -96,7 +102,7 @@ func (c *Config) DetectAuthMode() AuthMode {
 
 // Validate checks if the configuration is valid
 func (c *Config) Validate() error {
-	if c.Prompt == "" {
+	if c.Prompt == "" && c.PromptFile == "" {
 		return ErrPromptRequired
 	}
 	return nil

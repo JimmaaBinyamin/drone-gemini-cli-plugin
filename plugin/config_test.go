@@ -11,7 +11,7 @@ func TestConfigValidate(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty prompt should fail",
+			name:    "empty prompt and prompt_file should fail",
 			config:  Config{},
 			wantErr: true,
 		},
@@ -19,6 +19,21 @@ func TestConfigValidate(t *testing.T) {
 			name: "valid config with prompt",
 			config: Config{
 				Prompt: "test prompt",
+			},
+			wantErr: false,
+		},
+		{
+			name: "prompt_file without prompt should pass validation",
+			config: Config{
+				PromptFile: "review.md",
+			},
+			wantErr: false,
+		},
+		{
+			name: "both prompt and prompt_file should pass",
+			config: Config{
+				Prompt:     "fallback prompt",
+				PromptFile: "review.md",
 			},
 			wantErr: false,
 		},

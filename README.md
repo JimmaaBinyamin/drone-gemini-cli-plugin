@@ -80,13 +80,16 @@ steps:
 
 | Parameter | Environment Variable | Type | Default | Description |
 |-----------|---------------------|------|---------|-------------|
-| `prompt` | `PLUGIN_PROMPT` | string | **required** | AI instruction/prompt |
+| `prompt` | `PLUGIN_PROMPT` | string | required* | AI instruction/prompt (*not required if `prompt_file` is set) |
+| `prompt_file` | `PLUGIN_PROMPT_FILE` | string | | File path to read prompt from (overrides `prompt`) |
+| `context_file` | `PLUGIN_CONTEXT_FILE` | string | | File path to read additional context (passed via stdin) |
 | `target` | `PLUGIN_TARGET` | string | `.` | Working directory (usually `/drone/src`) |
 | `model` | `PLUGIN_MODEL` | string | `gemini-2.5-pro` | Model to use |
 | `output_format` | `PLUGIN_OUTPUT_FORMAT` | string | `json` | `text`, `json`, `stream-json` |
 | `yolo` | `PLUGIN_YOLO` | bool | `false` | Auto-approve all actions (enables file modifications) |
 | `approval_mode` | `PLUGIN_APPROVAL_MODE` | string | | Override approval mode |
 | `include_dirs` | `PLUGIN_INCLUDE_DIRS` | string | | Comma-separated directories to include |
+| `stdin_input` | `PLUGIN_STDIN_INPUT` | string | | Additional content passed via stdin |
 | `api_key` | `PLUGIN_API_KEY` | string | | Gemini API Key (Google AI Studio) |
 | `gcp_project` | `PLUGIN_GCP_PROJECT` | string | | GCP Project ID (Vertex AI) |
 | `gcp_location` | `PLUGIN_GCP_LOCATION` | string | `us-central1` | GCP Location (use `global` for gemini-3-*) |
@@ -168,6 +171,38 @@ steps:
         from_secret: gemini_api_key
     when:
       event: tag
+```
+
+### Review with File-Based Prompt
+
+Store your review guidelines in a markdown file in the repository:
+
+```yaml
+steps:
+  - name: review
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
+    settings:
+      prompt_file: ".review-guidelines.md"
+      git_diff: true
+      model: gemini-2.5-flash
+      api_key:
+        from_secret: gemini_api_key
+    when:
+      event: pull_request
+```
+
+You can also combine a prompt with additional context from a file:
+
+```yaml
+steps:
+  - name: review
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
+    settings:
+      prompt: "Check code against our architecture guidelines"
+      context_file: "docs/architecture.md"
+      git_diff: true
+      api_key:
+        from_secret: gemini_api_key
 ```
 
 ## Local Testing

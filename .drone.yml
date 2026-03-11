@@ -117,3 +117,50 @@ trigger:
     - push
   branch:
     - fix/*
+
+---
+# Pipeline for AI Code Review using Prompt File
+# Load review guidelines from a markdown file in the repository
+kind: pipeline
+type: docker
+name: review-with-guidelines
+
+steps:
+  - name: review
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
+    settings:
+      prompt_file: ".review-guidelines.md"
+      git_diff: true
+      model: gemini-2.5-flash
+      api_key:
+        from_secret: gemini_api_key
+    when:
+      event: pull_request
+
+trigger:
+  event:
+    - pull_request
+
+---
+# Pipeline for AI Code Review with Context File
+# Combine a prompt with additional architecture/context docs
+kind: pipeline
+type: docker
+name: review-with-context
+
+steps:
+  - name: review
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
+    settings:
+      prompt: "Review this code for compliance with our architecture guidelines"
+      context_file: "docs/architecture.md"
+      git_diff: true
+      model: gemini-2.5-flash
+      api_key:
+        from_secret: gemini_api_key
+    when:
+      event: pull_request
+
+trigger:
+  event:
+    - pull_request
