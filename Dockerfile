@@ -21,19 +21,17 @@ RUN apk add --no-cache python3 make g++ git
 # Install gemini-cli
 RUN npm install -g @google/gemini-cli --omit=dev
 
-# Clean up aggressively
+# Clean up safely - only remove files/dirs that are clearly not source code
 RUN npm cache clean --force \
     && rm -rf /root/.npm /tmp/* \
-    && find /usr/local/lib/node_modules -name "*.md" -delete 2>/dev/null || true \
     && find /usr/local/lib/node_modules -name "*.map" -delete 2>/dev/null || true \
     && find /usr/local/lib/node_modules -name "LICENSE*" -delete 2>/dev/null || true \
     && find /usr/local/lib/node_modules -name "CHANGELOG*" -delete 2>/dev/null || true \
     && find /usr/local/lib/node_modules -name "HISTORY*" -delete 2>/dev/null || true \
     && find /usr/local/lib/node_modules -name "README*" -delete 2>/dev/null || true \
-    && find /usr/local/lib/node_modules -type d -name "test" -exec rm -rf {} + 2>/dev/null || true \
-    && find /usr/local/lib/node_modules -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true \
-    && find /usr/local/lib/node_modules -type d -name "docs" -exec rm -rf {} + 2>/dev/null || true \
-    && find /usr/local/lib/node_modules -type d -name "doc" -exec rm -rf {} + 2>/dev/null || true \
+    && find /usr/local/lib/node_modules -name "*.md" ! -path "*/dist/*" -delete 2>/dev/null || true \
+    && find /usr/local/lib/node_modules -type d -name "test" -not -path "*/dist/*" -exec rm -rf {} + 2>/dev/null || true \
+    && find /usr/local/lib/node_modules -type d -name "tests" -not -path "*/dist/*" -exec rm -rf {} + 2>/dev/null || true \
     && find /usr/local/lib/node_modules -type d -name "example" -exec rm -rf {} + 2>/dev/null || true \
     && find /usr/local/lib/node_modules -type d -name "examples" -exec rm -rf {} + 2>/dev/null || true \
     && find /usr/local/lib/node_modules -type d -name ".github" -exec rm -rf {} + 2>/dev/null || true
