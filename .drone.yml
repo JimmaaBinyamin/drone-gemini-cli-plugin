@@ -12,59 +12,31 @@ steps:
       - go test -v ./...
 
 ---
-# Pipeline for AI Code Review on Pull Requests
+# ============================================================
+# Example 1: Basic Code Review (Inline Prompt + Git Diff)
+# ============================================================
 kind: pipeline
 type: docker
-name: ai-review
+name: basic-review
 
 steps:
-  # Option A: Using Gemini API Key (Google AI Studio)
-  - name: gemini-review
-    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
+  - name: code-review
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin:v0.1.5
     settings:
       prompt: |
-        Review this pull request:
-        - Check for security vulnerabilities
-        - Identify potential bugs
-        - Suggest performance improvements
-        - Evaluate code quality
-      git_diff: true
-      model: gemini-2.5-flash
-      output_format: json
-      api_key:
-        from_secret: gemini_api_key
-    when:
-      event: pull_request
-
-trigger:
-  event:
-    - pull_request
-
----
-# Pipeline for AI Code Review using Vertex AI
-kind: pipeline
-type: docker
-name: ai-review-vertex
-
-steps:
-  # Option B: Using Vertex AI with Service Account
-  - name: vertex-review
-    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
-    settings:
-      prompt: |
-        Perform comprehensive code review:
+        Review this code for:
         - Security vulnerabilities
-        - Bug detection
-        - Performance optimization
-        - Code quality assessment
+        - Potential bugs
+        - Code quality issues
+        Give a brief summary.
       git_diff: true
-      model: gemini-3-pro-preview
-      gcp_project:
-        from_secret: gcp_project
+      model: gemini-3-flash-preview
+      output_format: json
+      debug: true
+      gcp_project: your-gcp-project-id
       gcp_location: global
       gcp_credentials:
         from_secret: gcp_credentials
-      output_format: json
     when:
       event: pull_request
 
@@ -73,67 +45,26 @@ trigger:
     - pull_request
 
 ---
-# Pipeline for Commit Summary on Push
-kind: pipeline
-type: docker
-name: commit-summary
-
-steps:
-  - name: summarize
-    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
-    settings:
-      prompt: "Summarize the changes in this commit in a concise format"
-      git_diff: true
-      model: gemini-2.5-flash
-      api_key:
-        from_secret: gemini_api_key
-
-trigger:
-  event:
-    - push
-  branch:
-    - main
-    - master
-
----
-# Pipeline for Auto-Fix (YOLO Mode)
-# ⚠️ Use with caution - allows AI to modify files
-kind: pipeline
-type: docker
-name: auto-fix
-
-steps:
-  - name: fix-lint
-    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
-    settings:
-      prompt: "Fix all linting errors and code style issues"
-      yolo: true
-      include_dirs: "plugin"
-      api_key:
-        from_secret: gemini_api_key
-
-trigger:
-  event:
-    - push
-  branch:
-    - fix/*
-
----
-# Pipeline for AI Code Review using Prompt File
+# ============================================================
+# Example 2: Review with File-Based Prompt (prompt_file)
 # Load review guidelines from a markdown file in the repository
+# ============================================================
 kind: pipeline
 type: docker
 name: review-with-guidelines
 
 steps:
   - name: review
-    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin:v0.1.5
     settings:
       prompt_file: ".review-guidelines.md"
       git_diff: true
-      model: gemini-2.5-flash
-      api_key:
-        from_secret: gemini_api_key
+      model: gemini-3-flash-preview
+      debug: true
+      gcp_project: your-gcp-project-id
+      gcp_location: global
+      gcp_credentials:
+        from_secret: gcp_credentials
     when:
       event: pull_request
 
@@ -142,25 +73,141 @@ trigger:
     - pull_request
 
 ---
-# Pipeline for AI Code Review with Context File
+# ============================================================
+# Example 3: Review with Context File (context_file)
 # Combine a prompt with additional architecture/context docs
+# ============================================================
 kind: pipeline
 type: docker
 name: review-with-context
 
 steps:
   - name: review
-    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin:v0.1.5
     settings:
       prompt: "Review this code for compliance with our architecture guidelines"
       context_file: "docs/architecture.md"
       git_diff: true
-      model: gemini-2.5-flash
-      api_key:
-        from_secret: gemini_api_key
+      model: gemini-3-flash-preview
+      debug: true
+      gcp_project: your-gcp-project-id
+      gcp_location: global
+      gcp_credentials:
+        from_secret: gcp_credentials
     when:
       event: pull_request
 
 trigger:
   event:
     - pull_request
+
+---
+# ============================================================
+# Example 4: prompt_file + context_file Combined
+# Full-featured review with guidelines and architecture context
+# ============================================================
+kind: pipeline
+type: docker
+name: full-review
+
+steps:
+  - name: review
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin:v0.1.5
+    settings:
+      prompt_file: ".review-guidelines.md"
+      context_file: "docs/architecture.md"
+      git_diff: true
+      model: gemini-3-flash-preview
+      debug: true
+      gcp_project: your-gcp-project-id
+      gcp_location: global
+      gcp_credentials:
+        from_secret: gcp_credentials
+    when:
+      event: pull_request
+
+trigger:
+  event:
+    - pull_request
+
+---
+# ============================================================
+# Example 5: Commit Summary on Push
+# No git_diff - AI analyzes the entire project
+# ============================================================
+kind: pipeline
+type: docker
+name: commit-summary
+
+steps:
+  - name: summarize
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin:v0.1.5
+    settings:
+      prompt: "List all source files in this project and describe what each one does"
+      model: gemini-3-flash-preview
+      gcp_project: your-gcp-project-id
+      gcp_location: global
+      gcp_credentials:
+        from_secret: gcp_credentials
+
+trigger:
+  event:
+    - push
+  branch:
+    - main
+
+---
+# ============================================================
+# Example 6: Text Output Format
+# Simple text output instead of JSON
+# ============================================================
+kind: pipeline
+type: docker
+name: quick-summary
+
+steps:
+  - name: summary
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin:v0.1.5
+    settings:
+      prompt: "Summarize this project in 3 sentences"
+      output_format: text
+      model: gemini-3-flash-preview
+      gcp_project: your-gcp-project-id
+      gcp_location: global
+      gcp_credentials:
+        from_secret: gcp_credentials
+
+trigger:
+  event:
+    - push
+
+---
+# ============================================================
+# Example 7: YOLO Mode - AI Auto-Fix
+# ⚠️  AI can modify files and execute commands automatically
+# ============================================================
+kind: pipeline
+type: docker
+name: auto-fix
+
+steps:
+  - name: fix-issues
+    image: ghcr.io/jimmaabinyamin/drone-gemini-cli-plugin:v0.1.5
+    settings:
+      prompt: |
+        Fix the SQL injection vulnerabilities by using parameterized queries.
+        Fix the XSS vulnerabilities by escaping user input.
+        Only modify source files, do not create new files.
+        After fixing, show me the diff of your changes.
+      yolo: true
+      model: gemini-3-flash-preview
+      gcp_project: your-gcp-project-id
+      gcp_location: global
+      gcp_credentials:
+        from_secret: gcp_credentials
+
+trigger:
+  event:
+    - push
+  branch:
+    - fix/*
