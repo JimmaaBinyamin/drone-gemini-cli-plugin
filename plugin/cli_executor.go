@@ -31,9 +31,25 @@ func NewCLIExecutor(config *Config) *CLIExecutor {
 // CheckGeminiCLI verifies that gemini CLI is installed
 func (e *CLIExecutor) CheckGeminiCLI() error {
 	cmd := exec.Command("gemini", "--version")
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
+		if e.config.Debug {
+			fmt.Printf("[DEBUG] gemini --version failed: %v\n", err)
+			fmt.Printf("[DEBUG] stdout: %s\n", stdout.String())
+			fmt.Printf("[DEBUG] stderr: %s\n", stderr.String())
+			fmt.Printf("[DEBUG] PATH: %s\n", os.Getenv("PATH"))
+			// Check if wrapper script exists
+			if _, statErr := os.Stat("/usr/local/bin/gemini"); statErr == nil {
+				fmt.Println("[DEBUG] /usr/local/bin/gemini exists")
+			} else {
+				fmt.Printf("[DEBUG] /usr/local/bin/gemini: %v\n", statErr)
+			}
+		}
 		return ErrGeminiCLINotFound
 	}
+	fmt.Printf("Gemini CLI version: %s\n", strings.TrimSpace(stdout.String()))
 	return nil
 }
 
